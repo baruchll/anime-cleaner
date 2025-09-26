@@ -1,0 +1,12 @@
+
+services:
+  anime-fixer:
+    build:
+      context: /home/mub/Documents/Projects/anime_fixer
+      target: prod
+    container_name: anime_fixer
+    volumes:
+      - /mnt/media:/mnt/media
+    env_file:
+      - .env
+    restart: unless-stopped
