@@ -1,10 +1,9 @@
-
 services:
-  anime-fixer:
+  ani-cleaner:
     build:
-      context: /home/mub/Documents/Projects/anime_fixer
+      context: .
       target: prod
-    container_name: anime_fixer
+    container_name: ani-cleaner
     volumes:
       - /mnt/media:/mnt/media
     env_file:

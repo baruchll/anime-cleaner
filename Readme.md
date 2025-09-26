@@ -1,4 +1,4 @@
-# Anime Cleaner 🎬
+# Ani Cleaner 🎬
 
 A simple automation that cleans up anime video files by:  
 
@@ -24,8 +24,8 @@ Runs automatically once a day at **midnight** inside Docker.
 Clone the repo and enter the folder:
 
 ```bash
-git clone <your-repo-url>
-cd anime_fixer
+git clone https://github.com/baruchll/anime-cleaner.git
+cd ani-cleaner
 ```
 
 Create your `.env` from the template:
