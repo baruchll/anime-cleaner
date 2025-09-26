@@ -1,4 +1,4 @@
-# Anime Fixer 🎬
+# Anime Cleaner 🎬
 
 A simple automation that cleans up anime video files by:  
 
