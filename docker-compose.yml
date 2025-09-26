@@ -1,11 +1,25 @@
+version: "3.9"
 services:
-  ani-cleaner:
-    build:
-      context: .
-      target: prod
-    container_name: ani-cleaner
-    volumes:
-      - /mnt/media:/mnt/media
+  anime-cleaner:
+    image: ani-cleaner:1.1.0
+    container_name: anime-cleaner
     env_file:
       - .env
+    environment:
+      - MODE=anime
+    volumes:
+      - /mnt/media/anime:/mnt/media/anime
+      - /mnt/media/anime_movies:/mnt/media/anime_movies
+    restart: unless-stopped
+
+  movies-cleaner:
+    image: ani-cleaner:1.1.0
+    container_name: movies-cleaner
+    env_file:
+      - .env
+    environment:
+      - MODE=movies
+    volumes:
+      - /mnt/media/movies:/mnt/media/movies
+      - /mnt/media/tv:/mnt/media/tv
     restart: unless-stopped

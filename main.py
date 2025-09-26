@@ -3,19 +3,11 @@ from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from processors import process_file
 from utils import send_telegram_notification
+from config import LIBRARY_PATHS, MAX_WORKERS, MODE
 
-# Helper to enforce required variables
-def require_env(var_name: str) -> str:
-    value = os.getenv(var_name)
-    if value is None:
-        raise RuntimeError(f"Missing required environment variable: {var_name}")
-    return value
-
-# Required settings (must exist in .env)
-LIBRARY_PATH = require_env("ANIME_LIBRARY_PATH")
-MAX_WORKERS = int(require_env("MAX_WORKERS"))
 
 def scan_directory(source_dir: str):
+    """Return all video files under a directory."""
     video_files = []
     for root, _, files in os.walk(source_dir):
         for f in files:
@@ -23,27 +15,60 @@ def scan_directory(source_dir: str):
                 video_files.append(Path(root) / f)
     return video_files
 
-def standalone_mode():
-    files = scan_directory(LIBRARY_PATH)
+
+def process_library(label: str, path: str, max_workers: int):
+    files = scan_directory(path)
     total = len(files)
     processed = skipped = failed = 0
 
-    print(f"[INFO] Starting batch on {LIBRARY_PATH} ({total} files)")
+    print(f"[INFO] Starting batch for {label} ({total} files) at {path}")
 
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as ex:
+    with ThreadPoolExecutor(max_workers=max_workers) as ex:
         futures = {ex.submit(process_file, p): p for p in files}
         for fut in as_completed(futures):
             try:
                 status, _ = fut.result()
-                if status == "processed": processed += 1
-                elif status == "skipped": skipped += 1
-                else: failed += 1
+                if status == "processed":
+                    processed += 1
+                elif status == "skipped":
+                    skipped += 1
+                else:
+                    failed += 1
             except Exception:
                 failed += 1
 
-    summary = f"Anime fixer summary\nTotal: {total}\nProcessed: {processed}\nSkipped: {skipped}\nFailed: {failed}"
+    return {
+        "label": label,
+        "total": total,
+        "processed": processed,
+        "skipped": skipped,
+        "failed": failed,
+    }
+
+
+def standalone_mode():
+    results = []
+    # Iterate over whatever LIBRARY_PATHS were loaded by config.py
+    for idx, path in enumerate(LIBRARY_PATHS, start=1):
+        if not path:
+            continue
+        label = f"{MODE.capitalize()} Library {idx}"
+        results.append(process_library(label, path, MAX_WORKERS))
+
+    # Build summary
+    summary_lines = [f"{MODE.capitalize()} Cleaner summary"]
+    for r in results:
+        summary_lines.append(
+            f"{r['label']}: {r['total']} total | "
+            f"{r['processed']} processed | "
+            f"{r['skipped']} skipped | "
+            f"{r['failed']} failed"
+        )
+
+    summary = "\n".join(summary_lines)
     print(f"[INFO] {summary}")
     send_telegram_notification(summary)
+
 
 if __name__ == "__main__":
     standalone_mode()

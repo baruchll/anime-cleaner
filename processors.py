@@ -4,14 +4,26 @@ import os
 from pathlib import Path
 from utils import log_error, save_processed_file
 
+
 def parse_env_list(var_name: str) -> set[str]:
     raw = os.getenv(var_name)
     if not raw:
         raise RuntimeError(f"Missing required environment variable: {var_name}")
     return {lang.strip() for lang in raw.split(",")}
 
-ALLOWED_SUBS = parse_env_list("ALLOWED_SUBS")
-ALLOWED_AUDIO = parse_env_list("ALLOWED_AUDIO")
+
+# --- Mode-aware config ---
+MODE = os.getenv("MODE", "anime")
+
+if MODE == "anime":
+    ALLOWED_AUDIO = parse_env_list("ANIME_ALLOWED_AUDIO")
+    ALLOWED_SUBS = parse_env_list("ANIME_ALLOWED_SUBS")
+elif MODE == "movies":
+    ALLOWED_AUDIO = parse_env_list("MOVIES_ALLOWED_AUDIO")
+    ALLOWED_SUBS = parse_env_list("MOVIES_ALLOWED_SUBS")
+else:
+    raise RuntimeError(f"Invalid MODE: {MODE}")
+
 
 def get_track_info(file_path: Path):
     """Identify tracks and return JSON track list."""
@@ -27,6 +39,7 @@ def get_track_info(file_path: Path):
         print(f"[ERROR] Track identification failed for {file_path}: {e}")
         return []
 
+
 def needs_processing(tracks):
     """Return True if the file needs fixing, False if already correct."""
     english_audio_ok = False
@@ -40,6 +53,7 @@ def needs_processing(tracks):
             if lang not in ALLOWED_SUBS:
                 subs_ok = False
     return not (english_audio_ok and subs_ok)
+
 
 def process_file(file_path: Path):
     temp_file = file_path.with_suffix(".processed.mkv")
@@ -67,7 +81,6 @@ def process_file(file_path: Path):
         command = [
             "mkvmerge",
             "-o", str(temp_file),
-            "--default-track", "0:yes",
             "--default-track", f"{eng_audio_id}:yes",
             "--audio-tracks", ",".join(ALLOWED_AUDIO),
             "--subtitle-tracks", ",".join(ALLOWED_SUBS),
