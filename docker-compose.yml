@@ -1,8 +1,6 @@
 services:
   ani-cleaner:
-    build:
-      context: .
-      target: prod
+    image: ani-cleaner:1.0.0
     container_name: ani-cleaner
     volumes:
       - /mnt/media:/mnt/media
