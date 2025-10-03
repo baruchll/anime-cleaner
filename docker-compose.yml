@@ -1,6 +1,6 @@
 services:
   anime-cleaner:
-    image: ghcr.io/baruchll/anime-cleaner:1.1.0
+    image: ghcr.io/baruchll/anime-cleaner:latest
     container_name: anime-cleaner
     env_file:
       - .env
@@ -12,7 +12,7 @@ services:
     restart: unless-stopped
 
   movies-cleaner:
-    image: ghcr.io/baruchll/anime-cleaner:1.1.0
+    image: ghcr.io/baruchll/anime-cleaner:latest
     container_name: movies-cleaner
     env_file:
       - .env
