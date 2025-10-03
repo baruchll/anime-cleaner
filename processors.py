@@ -2,7 +2,7 @@ import json
 import subprocess
 import os
 from pathlib import Path
-from utils import log_error, save_processed_file
+from utils import log_error, save_processed_file, send_telegram_notification
 
 
 def parse_env_list(var_name: str) -> set[str]:
@@ -60,7 +60,10 @@ def process_file(file_path: Path):
     try:
         tracks = get_track_info(file_path)
         if not tracks:
-            print(f"[WARN] Skipping {file_path}, no track info")
+            msg = f"⚠️ Skipping {file_path.name}, no track info"
+            log_error(file_path, msg)
+            print(f"[WARN] {msg}")
+            send_telegram_notification(msg)
             return ("failed", file_path)
 
         if not needs_processing(tracks):
@@ -111,9 +114,12 @@ def process_file(file_path: Path):
         return ("processed", file_path)
 
     except Exception as e:
-        log_error(file_path, f"Processing Error: {e}")
-        print(f"[ERROR] Processing Error: {e}")
+        msg = f"❌ Failed to process {file_path.name}: {e}"
+        log_error(file_path, msg)
+        print(f"[ERROR] {msg}")
+        send_telegram_notification(msg)   # 🔔 send error to Telegram
         return ("failed", file_path)
+
     finally:
         try:
             if temp_file.exists():

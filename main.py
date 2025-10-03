@@ -48,11 +48,10 @@ def process_library(label: str, path: str, max_workers: int):
 
 def standalone_mode():
     results = []
-    # Iterate over whatever LIBRARY_PATHS were loaded by config.py
-    for idx, path in enumerate(LIBRARY_PATHS, start=1):
+    # LIBRARY_PATHS is now [(label, path), ...]
+    for label, path in LIBRARY_PATHS:
         if not path:
             continue
-        label = f"{MODE.capitalize()} Library {idx}"
         results.append(process_library(label, path, MAX_WORKERS))
 
     # Build summary
