@@ -7,7 +7,7 @@ A simple automation that cleans up anime video files by:
 - Skipping files that are already correctly configured.  
 - Sending a **daily summary to Telegram**.  
 
-Runs automatically once a day at **midnight** inside Docker.  
+Runs automatically once a week on friday at 23:00 inside Docker.  
 
 ---
 
