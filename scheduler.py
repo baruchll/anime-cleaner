@@ -24,7 +24,7 @@ def main():
     run_fixer()
 
     # Schedule once per day at midnight
-    schedule.every().day.at("00:00").do(run_fixer)
+    schedule.every().friday.at("23:00").do(run_fixer)
 
     print(f"[INFO] {MODE.capitalize()} cleaner scheduler started. Next run at 00:00")
 
